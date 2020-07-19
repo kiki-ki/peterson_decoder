@@ -11,11 +11,11 @@ def syndrome(m, t, y, e)
 
     # ビットごとの排他的論理和を計算
     (1..(y.size - 1)).each do |i|
-      total_arr = total.to_s(2).rjust(m, "0").split("")
-      map_arr = map["z#{y[i]}"].to_s(2).rjust(m, "0").split("")
+      a = total.to_s(2).rjust(m, "0").split("")
+      b = map["z#{y[i]}"].to_s(2).rjust(m, "0").split("")
 
-      total = total_arr.each_with_index.map do |v, idx|
-        (total_arr[idx].to_i ^ map_arr[idx].to_i).to_s
+      total = a.each_with_index.map do |v, idx|
+        (a[idx].to_i ^ b[idx].to_i).to_s
       end.join.to_i(2)
     end
 
