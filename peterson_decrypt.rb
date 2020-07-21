@@ -1,17 +1,20 @@
-# 配列を方程式に変形
-def to_equation(arr)
-  text = ""
-  arr.each_with_index do |v, i|
-    v == 1 ? text += "1" : text += "x^#{v}"
-    text += " + " unless i == arr.size - 1
+module ArrayClassExtention
+  # 配列を方程式に変形
+  def to_equation
+    text = ""
+    self.each_with_index do |v, i|
+      v == 1 ? text += "1" : text += "x^#{v}"
+      text += " + " unless i == self.size - 1
+    end
+    text
   end
-  text
 end
+Array.prepend(ArrayClassExtention)
 
 # シンドロームの計算
 def syndrome(m, t, y)
   puts "--- 受信 ---"
-  puts "受診語: y(x) = #{to_equation(y)}"
+  puts "受診語: y(x) = #{y.to_equation}"
 
   # ビットマップ作成
   map = { "0" => 0, "z0" => 1 } # z0 = 1 (便宜上、"z0"としてる)
@@ -34,12 +37,13 @@ def syndrome(m, t, y)
 
     total
   end
-  s
+  return s, map
 end
 
 # 誤り位置多項式を導出
-def error_position(s)
-
+def error_position(s, t, map)
+  u = t
+  s_keys = s.map { |v| map.key(v) }
 end
 
 # 有限体GF(2^m)
@@ -54,8 +58,8 @@ e = [7, 8]                # 誤り箇所(2箇所): x**7 + x**8
 y = [0, 4, 6]             # 受信語: 1 + x**4 + x**6
 
 puts "--- 送信 ---"
-puts "符号語: #{to_equation(ans)}"
+puts "符号語: #{ans.to_equation}"
 
-p s = syndrome(m, t, y)
-# err_pos = error_position(s)
+s, map = syndrome(m, t, y)
+err_pos = error_position(s, t, map)
 
