@@ -28,11 +28,11 @@ class Peterson
   attr_reader :m, :t, :y, :bitmap, :ans, :e
 
   def initialize(ans:, m:, t:, y:, e:)
-    @ans = ans
+    @ans = ans.sort
     @m = m
     @t = t
-    @y = y
-    @e = e
+    @y = y.sort
+    @e = e.sort
     @bitmap = bit_map(m)
   end
 
@@ -57,7 +57,7 @@ class Peterson
     duplication.each do |v|
       res.delete(v)
     end
-    res
+    res.sort
   end
 
   private
@@ -84,9 +84,11 @@ class Peterson
       a2 = u.times.map { |i| u.times.map { |j| s[i + j] } }
       until regular?(a2)
         u -= 1
-        raise "unregular error" if u <= 0
+        break if u <= 0
         a2 = u.times.map { |i| u.times.map { |j| s[i + j] } }
       end
+
+      return [] if u <= 0
 
       case a2.size
       when 1
@@ -129,6 +131,7 @@ class Peterson
       map
     end
 
+    # 正則か検証
     def regular?(a2)
       return false unless a2.size == a2.first.size
 
@@ -148,26 +151,33 @@ class Peterson
       end
     end
 
+    # 連結ビットをbitごとに足し算
     def sum_by_bit(a, b)
       a.each_with_index.map do |v, idx|
         (a[idx].to_i ^ b[idx].to_i).to_s
       end.join.to_i(2)
     end
 
+    # bitmapのキーから z の乗数を取得
     def get_z_multiplier(val)
       bitmap.key(val).delete("z").to_i
     end
 end
 
 # 有限体GF(2^m)
-ans = [0, 4, 6, 7, 8]
 m = 4
 n = 2**m - 1              # 符号長
 dist = 5                  # 設計距離: 2個以下の誤りを訂正できる最小値
 t = ((dist - 1) / 2).to_i # 訂正可能な誤りの個数
-y = [0, 4, 6]             # 受信語: 1 + x**4 + x**6
 kiyaku = [0, 1, 4]        # 規約多項式: 1 + x + x**4
-e = [7, 8]                # 誤り箇所(2箇所): x**7 + x**8
+
+ans = [0, 4, 6, 7, 8]
+
+puts "---------- [case1] ----------"
+puts "//have two error positions//"
+
+y =   [0, 4, 6] # 受信語: 1 + x**4 + x**6
+e =   [7, 8]    # 誤り箇所(2箇所): x**7 + x**8
 
 Peterson.new(
   ans: ans,
@@ -176,3 +186,37 @@ Peterson.new(
   y: y,
   e: e
 ).outputs
+puts "-----------------------------"
+puts ""
+
+puts "---------- [case2] ----------"
+puts "//have a error position//"
+y =   [0, 4, 6, 7]
+e =   [8]
+
+Peterson.new(
+  ans: ans,
+  m: m,
+  t: t,
+  y: y,
+  e: e
+).outputs
+puts "-----------------------------"
+puts ""
+
+
+puts "---------- [case3] ----------"
+puts "//haven't error position//"
+
+y =   [0, 4, 6, 7, 8]
+e =   []
+
+Peterson.new(
+  ans: ans,
+  m: m,
+  t: t,
+  y: y,
+  e: e
+).outputs
+puts "-----------------------------"
+puts ""
