@@ -25,12 +25,13 @@ end
 Integer.prepend(IntegerClassExtention)
 
 class Peterson
-  attr_reader :m, :t, :y, :bitmap, :ans, :e
+  attr_reader :m, :t, :y, :bitmap, :ans, :e, :n
 
-  def initialize(ans:, m:, t:, y:, e:)
+  def initialize(ans:, m:, t:, y:, e:, n:)
     @ans = ans.sort
     @m = m
     @t = t
+    @n = n
     @y = y.sort
     @e = e.sort
     @bitmap = bit_map(m)
@@ -65,11 +66,11 @@ class Peterson
     # シンドロームの計算
     def syndrome
       s = (2 * t).times.map do |i|
-        total = bitmap["z#{(y[0] * (i + 1)) % (2**m - 1)}"]
+        total = bitmap["z#{(y[0] * (i + 1)) % n}"]
         # ビットごとの排他的論理和を計算
         (1..(y.size - 1)).each do |j|
           a = total.to_bit_arr(m)
-          b = bitmap["z#{(y[j] * (i + 1)) % (2**m - 1)}"].to_bit_arr(m)
+          b = bitmap["z#{(y[j] * (i + 1)) % n}"].to_bit_arr(m)
 
           total = sum_by_bit(a, b)
         end
@@ -97,12 +98,12 @@ class Peterson
         z_multipliers = s.map { |v| get_z_multiplier(v) }
 
         err2 = sum_by_bit(
-          bitmap["z#{(z_multipliers[2] + z_multipliers[2] - @z_multiplier_of_a2) % (2**m - 1)}"].to_bit_arr(m),
-          bitmap["z#{(z_multipliers[1] + z_multipliers[3] - @z_multiplier_of_a2) % (2**m - 1)}"].to_bit_arr(m)
+          bitmap["z#{(z_multipliers[2] + z_multipliers[2] - @z_multiplier_of_a2) % n}"].to_bit_arr(m),
+          bitmap["z#{(z_multipliers[1] + z_multipliers[3] - @z_multiplier_of_a2) % n}"].to_bit_arr(m)
         )
         err1 = sum_by_bit(
-          bitmap["z#{(z_multipliers[1] + z_multipliers[2] - @z_multiplier_of_a2) % (2**m - 1)}"].to_bit_arr(m),
-          bitmap["z#{(z_multipliers[0] + z_multipliers[3] - @z_multiplier_of_a2) % (2**m - 1)}"].to_bit_arr(m)
+          bitmap["z#{(z_multipliers[1] + z_multipliers[2] - @z_multiplier_of_a2) % n}"].to_bit_arr(m),
+          bitmap["z#{(z_multipliers[0] + z_multipliers[3] - @z_multiplier_of_a2) % n}"].to_bit_arr(m)
         )
 
         z_multiplier_of_err2 = get_z_multiplier(err2)
@@ -112,10 +113,10 @@ class Peterson
         bitmap.each do |k, v|
           next if v == 0
           sum = sum_by_bit(
-            bitmap["z#{(z_multiplier_of_err1 + get_z_multiplier(v)) % (2**m - 1)}"].to_bit_arr(m),
-            bitmap["z#{(z_multiplier_of_err2 + get_z_multiplier(v) * 2) % (2**m - 1)}"].to_bit_arr(m)
+            bitmap["z#{(z_multiplier_of_err1 + get_z_multiplier(v)) % n}"].to_bit_arr(m),
+            bitmap["z#{(z_multiplier_of_err2 + get_z_multiplier(v) * 2) % n}"].to_bit_arr(m)
           )
-          err << (2**m - 1) - get_z_multiplier(v) if sum - 1 == 0
+          err << n - get_z_multiplier(v) if sum - 1 == 0
         end
 
         err.sort
@@ -140,8 +141,8 @@ class Peterson
         a2[0][0] != 0
       when 2
         z_multipliers = a2.map { |arr| arr.map { |v| get_z_multiplier(v) } }
-        a = bitmap["z#{(z_multipliers[0][0] + z_multipliers[1][1]) % (2**m - 1)}"].to_bit_arr(m)
-        b = bitmap["z#{(z_multipliers[0][1] + z_multipliers[1][0]) % (2**m - 1)}"].to_bit_arr(m)
+        a = bitmap["z#{(z_multipliers[0][0] + z_multipliers[1][1]) % n}"].to_bit_arr(m)
+        b = bitmap["z#{(z_multipliers[0][1] + z_multipliers[1][0]) % n}"].to_bit_arr(m)
         a2 = sum_by_bit(a, b)
         @z_multiplier_of_a2 = bitmap.key(a2).delete("z").to_i
 
@@ -184,7 +185,8 @@ Peterson.new(
   m: m,
   t: t,
   y: y,
-  e: e
+  e: e,
+  n: n
 ).outputs
 puts "-----------------------------"
 puts ""
@@ -199,7 +201,8 @@ Peterson.new(
   m: m,
   t: t,
   y: y,
-  e: e
+  e: e,
+  n: n
 ).outputs
 puts "-----------------------------"
 puts ""
@@ -216,7 +219,8 @@ Peterson.new(
   m: m,
   t: t,
   y: y,
-  e: e
+  e: e,
+  n: n
 ).outputs
 puts "-----------------------------"
 puts ""
