@@ -202,14 +202,8 @@ puts "//have two error positions//"
 y =   [0, 4, 6] # 受信語: 1 + x**4 + x**6
 e =   [7, 8]    # 誤り箇所(2箇所): x**7 + x**8
 
-Peterson.new(
-  kiyaku: kiyaku,
-  m: m,
-  t: t,
-  y: y,
-  e: e,
-  n: n
-).outputs
+Peterson.new(kiyaku: kiyaku, m: m, t: t, y: y, e: e, n: n).outputs
+
 puts "-----------------------------"
 puts ""
 
@@ -218,14 +212,8 @@ puts "//have a error position//"
 y =   [0, 4, 6, 7]
 e =   [8]
 
-Peterson.new(
-  kiyaku: kiyaku,
-  m: m,
-  t: t,
-  y: y,
-  e: e,
-  n: n
-).outputs
+Peterson.new(kiyaku: kiyaku, m: m, t: t, y: y, e: e, n: n).outputs
+
 puts "-----------------------------"
 puts ""
 
@@ -236,13 +224,7 @@ puts "//haven't error position//"
 y =   [0, 4, 6, 7, 8]
 e =   []
 
-Peterson.new(
-  kiyaku: kiyaku,
-  m: m,
-  t: t,
-  y: y,
-  e: e,
-  n: n
-).outputs
+Peterson.new(kiyaku: kiyaku, m: m, t: t, y: y, e: e, n: n).outputs
+
 puts "-----------------------------"
 puts ""
