@@ -116,6 +116,8 @@ class Peterson
         end
 
         err.sort
+      else
+        raise "3 or more errors exist. this pattern is in preperation."
       end
     end
 
