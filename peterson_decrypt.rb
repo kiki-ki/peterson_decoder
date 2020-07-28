@@ -25,10 +25,10 @@ end
 Integer.prepend(IntegerClassExtention)
 
 class Peterson
-  attr_reader :m, :t, :y, :bitmap, :ans, :e, :n
+  attr_reader :m, :t, :y, :bitmap, :c, :e, :n
 
-  def initialize(ans:, m:, t:, y:, e:, n:)
-    @ans = ans.sort
+  def initialize(kiyaku:, m:, t:, y:, e:, n:)
+    @c = calc_c(kiyaku, m)
     @m = m
     @t = t
     @n = n
@@ -39,7 +39,7 @@ class Peterson
 
   def outputs
     puts "--- 送信 ---"
-    puts "sent_code:             #{ans.to_equation}"
+    puts "sent_code:             #{c.to_equation}"
     puts "--- 受信 ---"
     puts "recieved_code:         #{y.to_equation}"
     puts "gave_err_position:     #{e.to_equation}"
@@ -47,17 +47,13 @@ class Peterson
     s = syndrome
     puts "detected_err_position: #{err_position(s).to_equation}"
     puts "decoded_result:        #{decode.to_equation}"
-    puts "expected:              #{ans.to_equation}"
+    puts "expected:              #{c.to_equation}"
   end
 
   def decode
     s = syndrome
     err = err_position(s)
-    duplication = y & err
-    res = y | err
-    duplication.each do |v|
-      res.delete(v)
-    end
+    res = sum_polynomial(y, err)
     res.sort
   end
 
@@ -163,16 +159,42 @@ class Peterson
     def get_z_multiplier(val)
       bitmap.key(val).delete("z").to_i
     end
+
+    # 規約多項式、拡大体のサイズから符号を算出
+    def calc_c(kiyaku, m)
+      g2 = (m + 1).times.map { |i| i }
+      multiplicate_polynomial(kiyaku, g2)
+    end
+
+    # 多項式の足し算
+    def sum_polynomial(a, b)
+      arr = a + b
+      aggregate_for_polynamial(arr)
+    end
+
+    # 多項式の掛け算
+    def multiplicate_polynomial(a, b)
+      arr = []
+      a.each do |v|
+        arr += b.map { |w| v + w }
+      end
+      aggregate_for_polynamial(arr)
+    end
+
+    def aggregate_for_polynamial(arr)
+      cnt = arr.group_by(&:itself).map { |k, v| [k, v.count] }.to_h
+      cnt.select { |k, v| v.odd? }.map { |k, v| k }
+    end
 end
 
-# 有限体GF(2^m)
+# 拡大体 F(2^m)
 m = 4
 n = 2**m - 1              # 符号長
 dist = 5                  # 設計距離: 2個以下の誤りを訂正できる最小値
 t = ((dist - 1) / 2).to_i # 訂正可能な誤りの個数
 kiyaku = [0, 1, 4]        # 規約多項式: 1 + x + x**4
 
-ans = [0, 4, 6, 7, 8]
+# 巡回符号 1 + x^4 + x^6 + x^7 + x^8 [0, 4, 6, 7, 8]
 
 puts "---------- [case1] ----------"
 puts "//have two error positions//"
@@ -181,7 +203,7 @@ y =   [0, 4, 6] # 受信語: 1 + x**4 + x**6
 e =   [7, 8]    # 誤り箇所(2箇所): x**7 + x**8
 
 Peterson.new(
-  ans: ans,
+  kiyaku: kiyaku,
   m: m,
   t: t,
   y: y,
@@ -197,7 +219,7 @@ y =   [0, 4, 6, 7]
 e =   [8]
 
 Peterson.new(
-  ans: ans,
+  kiyaku: kiyaku,
   m: m,
   t: t,
   y: y,
@@ -215,7 +237,7 @@ y =   [0, 4, 6, 7, 8]
 e =   []
 
 Peterson.new(
-  ans: ans,
+  kiyaku: kiyaku,
   m: m,
   t: t,
   y: y,
